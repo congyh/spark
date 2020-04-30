@@ -2713,7 +2713,7 @@ object SparkContext extends Logging {
    * Create a task scheduler based on a given master URL.
    * Return a 2-tuple of the scheduler backend and the task scheduler.
    */
-  private def createTaskScheduler(
+  private def createTaskScheduler( // Note: Create scheduler backend.
       sc: SparkContext,
       master: String,
       deployMode: String): (SchedulerBackend, TaskScheduler) = {
@@ -2778,7 +2778,7 @@ object SparkContext extends Logging {
         }
         (backend, scheduler)
 
-      case masterUrl =>
+      case masterUrl => // Note: We should focus on cluster mode.
         val cm = getClusterManager(masterUrl) match {
           case Some(clusterMgr) => clusterMgr
           case None => throw new SparkException("Could not parse Master URL: '" + master + "'")

@@ -94,7 +94,7 @@ private[sql] object Dataset {
  * a Dataset represents a logical plan that describes the computation required to produce the data.
  * When an action is invoked, Spark's query optimizer optimizes the logical plan and generates a
  * physical plan for efficient execution in a parallel and distributed manner. To explore the
- * logical plan as well as optimized physical plan, use the `explain` function.
+ * logical plan as well as optimized physical plan, use the `explain` function. Note: Encoder is the serializer and deserializer between binary structure and java object.
  *
  * To efficiently support domain-specific objects, an [[Encoder]] is required. The encoder maps
  * the domain specific type `T` to Spark's internal type system. For example, given a class `Person`

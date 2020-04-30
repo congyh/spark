@@ -89,7 +89,7 @@ abstract class QueryPlanner[PhysicalPlan <: TreeNode[PhysicalPlan]] {
       }
     }
 
-    val pruned = prunePlans(plans)
+    val pruned = prunePlans(plans) // Note: Try to prune bad physical plans, but not implemented now as of spark 2.4.
     assert(pruned.hasNext, s"No plan for $plan")
     pruned
   }
@@ -100,6 +100,6 @@ abstract class QueryPlanner[PhysicalPlan <: TreeNode[PhysicalPlan]] {
    */
   protected def collectPlaceholders(plan: PhysicalPlan): Seq[(PhysicalPlan, LogicalPlan)]
 
-  /** Prunes bad plans to prevent combinatorial explosion. */
+  /** Prunes bad plans to prevent combinatorial explosion. */ // Note: Not implemented now, which means no plans will be pruned
   protected def prunePlans(plans: Iterator[PhysicalPlan]): Iterator[PhysicalPlan]
 }

@@ -649,7 +649,7 @@ class Analyzer(
   }
 
   /**
-   * Replaces [[UnresolvedRelation]]s with concrete relations from the catalog.
+   * Replaces [[UnresolvedRelation]]s with concrete relations from the catalog. // Note: Critical structure.
    */
   object ResolveRelations extends Rule[LogicalPlan] {
 
@@ -682,7 +682,7 @@ class Analyzer(
     def resolveRelation(plan: LogicalPlan): LogicalPlan = plan match {
       case u: UnresolvedRelation if !isRunningDirectlyOnFiles(u.tableIdentifier) =>
         val defaultDatabase = AnalysisContext.get.defaultDatabase
-        val foundRelation = lookupTableFromCatalog(u, defaultDatabase)
+        val foundRelation = lookupTableFromCatalog(u, defaultDatabase) // Note: critical calling
         resolveRelation(foundRelation)
       // The view's child should be a logical plan parsed from the `desc.viewText`, the variable
       // `viewText` should be defined, or else we throw an error on the generation of the View
@@ -725,9 +725,9 @@ class Analyzer(
         u: UnresolvedRelation,
         defaultDatabase: Option[String] = None): LogicalPlan = {
       val tableIdentWithDb = u.tableIdentifier.copy(
-        database = u.tableIdentifier.database.orElse(defaultDatabase))
+        database = u.tableIdentifier.database.orElse(defaultDatabase)) // Note: Get database identifier from sql
       try {
-        catalog.lookupRelation(tableIdentWithDb)
+        catalog.lookupRelation(tableIdentWithDb) // Note: Critical calling.
       } catch {
         case e: NoSuchTableException =>
           u.failAnalysis(s"Table or view not found: ${tableIdentWithDb.unquotedString}", e)

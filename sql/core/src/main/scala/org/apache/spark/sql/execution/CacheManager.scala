@@ -43,7 +43,7 @@ case class CachedData(plan: LogicalPlan, cachedRepresentation: InMemoryRelation)
  *
  * Internal to Spark SQL.
  */
-class CacheManager extends Logging {
+class CacheManager extends Logging { // Note: TODO: Will relplace the actually
 
   @transient
   private val cachedData = new java.util.LinkedList[CachedData]
@@ -209,7 +209,7 @@ class CacheManager extends Logging {
 
   /** Optionally returns cached data for the given [[LogicalPlan]]. */
   def lookupCachedData(plan: LogicalPlan): Option[CachedData] = readLock {
-    cachedData.asScala.find(cd => plan.sameResult(cd.plan))
+    cachedData.asScala.find(cd => plan.sameResult(cd.plan)) // Note: The function of find is to find the true return in iterator.
   }
 
   /** Replaces segments of the given logical plan with cached versions where possible. */

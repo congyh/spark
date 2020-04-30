@@ -138,7 +138,7 @@ class SparkSession private(
    */
   @InterfaceStability.Unstable
   @transient
-  lazy val sessionState: SessionState = {
+  lazy val sessionState: SessionState = { // Note: Application level shared session state.
     parentSessionState
       .map(_.clone(this))
       .getOrElse {

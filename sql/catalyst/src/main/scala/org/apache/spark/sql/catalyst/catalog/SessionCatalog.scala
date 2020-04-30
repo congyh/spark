@@ -692,17 +692,17 @@ class SessionCatalog(
    * wrap the logical plan in a [[SubqueryAlias]] which will track the name of the view.
    * [[SubqueryAlias]] will also keep track of the name and database(optional) of the table/view
    *
-   * @param name The name of the table/view that we look up.
+   * @param name The name of the table/view that we look up. // Note: Critical method.
    */
   def lookupRelation(name: TableIdentifier): LogicalPlan = {
     synchronized {
       val db = formatDatabaseName(name.database.getOrElse(currentDb))
       val table = formatTableName(name.table)
-      if (db == globalTempViewManager.database) {
+      if (db == globalTempViewManager.database) { // Note: If is temp view
         globalTempViewManager.get(table).map { viewDef =>
           SubqueryAlias(table, db, viewDef)
         }.getOrElse(throw new NoSuchTableException(db, table))
-      } else if (name.database.isDefined || !tempViews.contains(table)) {
+      } else if (name.database.isDefined || !tempViews.contains(table)) { // Note: If is table of some catalog.
         val metadata = externalCatalog.getTable(db, table)
         if (metadata.tableType == CatalogTableType.VIEW) {
           val viewText = metadata.viewText.getOrElse(sys.error("Invalid view without text."))

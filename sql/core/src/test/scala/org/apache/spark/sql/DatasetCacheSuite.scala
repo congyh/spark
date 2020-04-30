@@ -45,7 +45,7 @@ class DatasetCacheSuite extends QueryTest with SharedSQLContext with TimeLimits 
 
     // default storage level
     ds1.persist()
-    ds2.cache()
+    ds2.cache() // Note: Cache uses the default storage level of persist.
     assert(ds1.storageLevel == StorageLevel.MEMORY_AND_DISK)
     assert(ds2.storageLevel == StorageLevel.MEMORY_AND_DISK)
     // unpersist

@@ -179,7 +179,7 @@ abstract class UnaryNode extends LogicalPlan {
 /**
  * A logical plan node with a left and right child.
  */
-abstract class BinaryNode extends LogicalPlan {
+abstract class BinaryNode extends LogicalPlan { // Note: BinaryNode is a binary tree of LogicalPlan.
   def left: LogicalPlan
   def right: LogicalPlan
 

@@ -117,7 +117,7 @@ case class CreateViewCommand(
   }
 
   // Temporary view names should NOT contain database prefix like "database.table"
-  if (isTemporary && name.database.isDefined) {
+  if (isTemporary && name.database.isDefined) { // Note: temp view is not allowed to replace global table.
     val database = name.database.get
     throw new AnalysisException(
       s"It is not allowed to add database prefix `$database` for the TEMPORARY view name.")

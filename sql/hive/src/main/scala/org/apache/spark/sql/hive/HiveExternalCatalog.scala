@@ -50,7 +50,7 @@ import org.apache.spark.sql.types.{DataType, StructType}
 
 /**
  * A persistent implementation of the system catalog using Hive.
- * All public methods must be synchronized for thread-safety.
+ * All public methods must be synchronized for thread-safety. Note: TODO: hack this class to replace hive tables.
  */
 private[spark] class HiveExternalCatalog(conf: SparkConf, hadoopConf: Configuration)
   extends ExternalCatalog with Logging {
