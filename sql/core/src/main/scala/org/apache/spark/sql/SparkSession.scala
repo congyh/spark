@@ -143,7 +143,7 @@ class SparkSession private(
       .map(_.clone(this))
       .getOrElse {
         val state = SparkSession.instantiateSessionState( // Note: Initial session state including SessionCatalog from conf.
-          SparkSession.sessionStateClassName(sparkContext.conf),
+          SparkSession.sessionStateClassName(sparkContext.conf), // Note: Invoke specific session state builder according to conf, like hive session state builder.
           self)
         initialSessionOptions.foreach { case (k, v) => state.conf.setConfString(k, v) }
         state

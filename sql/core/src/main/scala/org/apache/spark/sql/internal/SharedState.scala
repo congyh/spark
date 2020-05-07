@@ -166,7 +166,7 @@ object SharedState extends Logging { // Note: Critical object, use to parse some
   private val HIVE_EXTERNAL_CATALOG_CLASS_NAME = "org.apache.spark.sql.hive.HiveExternalCatalog"
 
   private def externalCatalogClassName(conf: SparkConf): String = {
-    conf.get(CATALOG_IMPLEMENTATION) match {
+    conf.get(CATALOG_IMPLEMENTATION) match { // Note: Default is in-memory.
       case "hive" => HIVE_EXTERNAL_CATALOG_CLASS_NAME
       case "in-memory" => classOf[InMemoryCatalog].getCanonicalName
     }

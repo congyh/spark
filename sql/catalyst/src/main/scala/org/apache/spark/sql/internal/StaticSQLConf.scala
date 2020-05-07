@@ -32,7 +32,7 @@ object StaticSQLConf {
     .doc("The default location for managed databases and tables.")
     .stringConf
     .createWithDefault(Utils.resolveURI("spark-warehouse").toString)
-
+  // Note: Default catalog implementation is in-memory
   val CATALOG_IMPLEMENTATION = buildStaticConf("spark.sql.catalogImplementation")
     .internal()
     .stringConf
