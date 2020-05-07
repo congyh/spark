@@ -680,10 +680,10 @@ class Analyzer(
     // Note this is compatible with the views defined by older versions of Spark(before 2.2), which
     // have empty defaultDatabase and all the relations in viewText have database part defined.
     def resolveRelation(plan: LogicalPlan): LogicalPlan = plan match {
-      case u: UnresolvedRelation if !isRunningDirectlyOnFiles(u.tableIdentifier) =>
+      case u: UnresolvedRelation if !isRunningDirectlyOnFiles(u.tableIdentifier) => // Note: UnresolvedRelation and not running on files
         val defaultDatabase = AnalysisContext.get.defaultDatabase
-        val foundRelation = lookupTableFromCatalog(u, defaultDatabase) // Note: critical calling
-        resolveRelation(foundRelation)
+        val foundRelation = lookupTableFromCatalog(u, defaultDatabase) // Note: critical calling, return unresolved LogicalPlan.
+        resolveRelation(foundRelation) // Note: Turn unresolved LogicalPlan to resolved LogicalPlan.
       // The view's child should be a logical plan parsed from the `desc.viewText`, the variable
       // `viewText` should be defined, or else we throw an error on the generation of the View
       // operator.
@@ -702,7 +702,7 @@ class Analyzer(
       case p @ SubqueryAlias(_, view: View) =>
         val newChild = resolveRelation(view)
         p.copy(child = newChild)
-      case _ => plan
+      case _ => plan // Note: Running directly on files, resolve later.
     }
 
     def apply(plan: LogicalPlan): LogicalPlan = plan.resolveOperatorsUp {
@@ -721,13 +721,13 @@ class Analyzer(
     // 2. Use defaultDatabase, if it is defined(In this case, no temporary objects can be used,
     //    and the default database is only used to look up a view);
     // 3. Use the currentDb of the SessionCatalog.
-    private def lookupTableFromCatalog(
+    private def lookupTableFromCatalog( // Note: Return LogicalPlan.
         u: UnresolvedRelation,
         defaultDatabase: Option[String] = None): LogicalPlan = {
       val tableIdentWithDb = u.tableIdentifier.copy(
         database = u.tableIdentifier.database.orElse(defaultDatabase)) // Note: Get database identifier from sql
       try {
-        catalog.lookupRelation(tableIdentWithDb) // Note: Critical calling.
+        catalog.lookupRelation(tableIdentWithDb) // Note: Critical calling. returns a logical plan.
       } catch {
         case e: NoSuchTableException =>
           u.failAnalysis(s"Table or view not found: ${tableIdentWithDb.unquotedString}", e)

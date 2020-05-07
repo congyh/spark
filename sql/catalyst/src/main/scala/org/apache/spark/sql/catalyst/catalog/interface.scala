@@ -237,7 +237,7 @@ case class CatalogTable(
     createTime: Long = System.currentTimeMillis,
     lastAccessTime: Long = -1,
     createVersion: String = "",
-    properties: Map[String, String] = Map.empty,
+    properties: Map[String, String] = Map.empty, // Note: This is a extension field, contains key like provider, see restoreTableMetadata method of HiveExternalCatalog.scala.
     stats: Option[CatalogStatistics] = None,
     viewText: Option[String] = None,
     comment: Option[String] = None,

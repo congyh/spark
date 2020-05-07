@@ -427,7 +427,7 @@ private[hive] class HiveClientImpl(
       }
       val comment = properties.get("comment")
 
-      CatalogTable(
+      CatalogTable( // Note: TODO: See what a CatalogTable of Hive table look like in runtime.
         identifier = TableIdentifier(h.getTableName, Option(h.getDbName)),
         tableType = h.getTableType match {
           case HiveTableType.EXTERNAL_TABLE => CatalogTableType.EXTERNAL

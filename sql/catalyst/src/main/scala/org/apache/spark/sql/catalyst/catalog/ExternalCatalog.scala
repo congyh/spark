@@ -30,7 +30,7 @@ import org.apache.spark.sql.types.StructType
  *
  * Implementations should throw [[NoSuchDatabaseException]] when databases don't exist.
  */
-trait ExternalCatalog {
+trait ExternalCatalog { // Note: Critical trait
   import CatalogTypes.TablePartitionSpec
 
   // --------------------------------------------------------------------------

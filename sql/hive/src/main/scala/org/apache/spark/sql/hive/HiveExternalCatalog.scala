@@ -696,8 +696,8 @@ private[spark] class HiveExternalCatalog(conf: SparkConf, hadoopConf: Configurat
     client.alterTable(updatedTable)
   }
 
-  override def getTable(db: String, table: String): CatalogTable = withClient {
-    restoreTableMetadata(getRawTable(db, table))
+  override def getTable(db: String, table: String): CatalogTable = withClient { // Note: Critical method. Get table metadata.
+    restoreTableMetadata(getRawTable(db, table)) // Note: Get specific table metadata from origin full metadata
   }
 
   /**
@@ -705,16 +705,16 @@ private[spark] class HiveExternalCatalog(conf: SparkConf, hadoopConf: Configurat
    * of [[createTable]].
    *
    * It reads table schema, provider, partition column names and bucket specification from table
-   * properties, and filter out these special entries from table properties.
+   * properties, and filter out these special entries from table properties. // Note: TODO: hack this method to interceptor hive table resolve.
    */
-  private def restoreTableMetadata(inputTable: CatalogTable): CatalogTable = {
-    if (conf.get(DEBUG_MODE)) {
+  private def restoreTableMetadata(inputTable: CatalogTable): CatalogTable = { // Note: Get specific table metadata from origin full metadata
+    if (conf.get(DEBUG_MODE)) { // Note: In debug mode, return table of arg immediately.
       return inputTable
     }
 
-    var table = inputTable
+    var table = inputTable // Note: Init return.
 
-    table.properties.get(DATASOURCE_PROVIDER) match {
+    table.properties.get(DATASOURCE_PROVIDER) match { // Note: Post process return.
       case None if table.tableType == VIEW =>
         // If this is a view created by Spark 2.2 or higher versions, we should restore its schema
         // from table properties.

@@ -155,7 +155,7 @@ private[sql] class SharedState(val sparkContext: SparkContext) extends Logging {
 
 }
 
-object SharedState extends Logging {
+object SharedState extends Logging { // Note: Critical object, use to parse some shared state like external catalog name.
   try {
     URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory())
   } catch {

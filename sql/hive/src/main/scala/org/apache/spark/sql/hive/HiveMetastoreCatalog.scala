@@ -36,7 +36,7 @@ import org.apache.spark.sql.types._
  * Legacy catalog for interacting with the Hive metastore.
  *
  * This is still used for things like creating data source tables, but in the future will be
- * cleaned up to integrate more nicely with [[HiveExternalCatalog]].
+ * cleaned up to integrate more nicely with [[HiveExternalCatalog]]. // Note: Deprecated, use HiveExternalCatalog instead.
  */
 private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Logging {
   // these are def_s and not val/lazy val since the latter would introduce circular references

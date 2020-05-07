@@ -698,13 +698,13 @@ class SessionCatalog(
     synchronized {
       val db = formatDatabaseName(name.database.getOrElse(currentDb))
       val table = formatTableName(name.table)
-      if (db == globalTempViewManager.database) { // Note: If is temp view
+      if (db == globalTempViewManager.database) { // Note: If is a global temp view
         globalTempViewManager.get(table).map { viewDef =>
           SubqueryAlias(table, db, viewDef)
         }.getOrElse(throw new NoSuchTableException(db, table))
       } else if (name.database.isDefined || !tempViews.contains(table)) { // Note: If is table of some catalog.
-        val metadata = externalCatalog.getTable(db, table)
-        if (metadata.tableType == CatalogTableType.VIEW) {
+        val metadata = externalCatalog.getTable(db, table) // Note: Get metadata of table from external catalog like hive.
+        if (metadata.tableType == CatalogTableType.VIEW) { // Note: If is a view of external catalog.
           val viewText = metadata.viewText.getOrElse(sys.error("Invalid view without text."))
           // The relation is a view, so we wrap the relation by:
           // 1. Add a [[View]] operator over the relation to keep track of the view desc;
@@ -714,10 +714,10 @@ class SessionCatalog(
             output = metadata.schema.toAttributes,
             child = parser.parsePlan(viewText))
           SubqueryAlias(table, db, child)
-        } else {
+        } else { // Note: If is a regular table.
           SubqueryAlias(table, db, UnresolvedCatalogRelation(metadata))
         }
-      } else {
+      } else { // Note: If is a temp view.
         SubqueryAlias(table, tempViews(table))
       }
     }

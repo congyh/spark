@@ -180,14 +180,14 @@ case class HiveTableScanExec(
     prunedPartitions.map(HiveClientImpl.toHivePartition(_, hiveQlTable))
   }
 
-  protected override def doExecute(): RDD[InternalRow] = {
+  protected override def doExecute(): RDD[InternalRow] = { // Note: Entrance method.
     // Using dummyCallSite, as getCallSite can turn out to be expensive with
     // multiple partitions.
-    val rdd = if (!relation.isPartitioned) {
+    val rdd = if (!relation.isPartitioned) { // Note: If not partitioned table.
       Utils.withDummyCallSite(sqlContext.sparkContext) {
         hadoopReader.makeRDDForTable(hiveQlTable)
       }
-    } else {
+    } else { // Note: If is partitioned table.
       Utils.withDummyCallSite(sqlContext.sparkContext) {
         hadoopReader.makeRDDForPartitionedTable(prunePartitions(rawPartitions))
       }
