@@ -59,7 +59,7 @@ class InMemoryCatalog(
   }
 
   // Database name -> description
-  private val catalog = new scala.collection.mutable.HashMap[String, DatabaseDesc]
+  private val catalog = new scala.collection.mutable.HashMap[String, DatabaseDesc] // Note: Catalog structure of InMemoryCatalog is a bare mutable HashMap.
 
   private def partitionExists(db: String, table: String, spec: TablePartitionSpec): Boolean = {
     requireTableExists(db, table)
@@ -322,7 +322,7 @@ class InMemoryCatalog(
     catalog(db).tables(table).table = origTable.copy(stats = stats)
   }
 
-  override def getTable(db: String, table: String): CatalogTable = synchronized {
+  override def getTable(db: String, table: String): CatalogTable = synchronized { // Note: synchronized is equivalent to this.synchronized.
     requireTableExists(db, table)
     catalog(db).tables(table).table
   }

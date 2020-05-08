@@ -361,7 +361,7 @@ private[hive] class HiveClientImpl(
     getRawTableOption(dbName, tableName).nonEmpty
   }
 
-  override def getTableOption(
+  override def getTableOption( // Note: TODO: hack this method to replace hive table using remote spark app as server.
       dbName: String,
       tableName: String): Option[CatalogTable] = withHiveState {
     logDebug(s"Looking up $dbName.$tableName")
