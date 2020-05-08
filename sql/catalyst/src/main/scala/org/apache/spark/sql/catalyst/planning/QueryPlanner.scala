@@ -52,9 +52,9 @@ abstract class GenericStrategy[PhysicalPlan <: TreeNode[PhysicalPlan]] extends L
  *
  * @tparam PhysicalPlan The type of physical plan produced by this [[QueryPlanner]]
  */
-abstract class QueryPlanner[PhysicalPlan <: TreeNode[PhysicalPlan]] {
+abstract class QueryPlanner[PhysicalPlan <: TreeNode[PhysicalPlan]] { // Note: Right now only one plan is returned.
   /** A list of execution strategies that can be used by the planner */
-  def strategies: Seq[GenericStrategy[PhysicalPlan]]
+  def strategies: Seq[GenericStrategy[PhysicalPlan]] // Note: Will be assigned in sub-class.
 
   def plan(plan: LogicalPlan): Iterator[PhysicalPlan] = {
     // Obviously a lot to do here still...

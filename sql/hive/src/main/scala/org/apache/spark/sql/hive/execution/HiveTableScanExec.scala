@@ -185,7 +185,7 @@ case class HiveTableScanExec(
     // multiple partitions.
     val rdd = if (!relation.isPartitioned) { // Note: If not partitioned table.
       Utils.withDummyCallSite(sqlContext.sparkContext) {
-        hadoopReader.makeRDDForTable(hiveQlTable)
+        hadoopReader.makeRDDForTable(hiveQlTable) // Note: This table is from CatalogTable.
       }
     } else { // Note: If is partitioned table.
       Utils.withDummyCallSite(sqlContext.sparkContext) {
