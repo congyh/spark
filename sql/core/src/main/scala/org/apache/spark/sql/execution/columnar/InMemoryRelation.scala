@@ -142,7 +142,7 @@ object InMemoryRelation {
       child: SparkPlan,
       tableName: Option[String],
       logicalPlan: LogicalPlan): InMemoryRelation = {
-    val cacheBuilder = CachedRDDBuilder(useCompression, batchSize, storageLevel, child, tableName)()
+    val cacheBuilder = CachedRDDBuilder(useCompression, batchSize, storageLevel, child, tableName)() // Note: Prepare a builder.
     new InMemoryRelation(child.output, cacheBuilder)(
       statsOfPlanToCache = logicalPlan.stats, outputOrdering = logicalPlan.outputOrdering)
   }

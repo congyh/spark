@@ -43,10 +43,10 @@ case class CachedData(plan: LogicalPlan, cachedRepresentation: InMemoryRelation)
  *
  * Internal to Spark SQL.
  */
-class CacheManager extends Logging { // Note: TODO: Will relplace the actually
+class CacheManager extends Logging {
 
   @transient
-  private val cachedData = new java.util.LinkedList[CachedData]
+  private val cachedData = new java.util.LinkedList[CachedData] // Note: Main data structure.
 
   @transient
   private val cacheLock = new ReentrantReadWriteLock
@@ -85,14 +85,14 @@ class CacheManager extends Logging { // Note: TODO: Will relplace the actually
    * Unlike `RDD.cache()`, the default storage level is set to be `MEMORY_AND_DISK` because
    * recomputing the in-memory columnar representation of the underlying table is expensive.
    */
-  def cacheQuery(
-      query: Dataset[_],
+  def cacheQuery( // Note: Critical method. TODO: need to refine to use MEMORY_ONLY storage level to meet the need of spark-spark-app project.
+      query: Dataset[_], // Note: Place holder here means we don't care the actual schema of Dataset.
       tableName: Option[String] = None,
       storageLevel: StorageLevel = MEMORY_AND_DISK): Unit = writeLock {
     val planToCache = query.logicalPlan
-    if (lookupCachedData(planToCache).nonEmpty) {
+    if (lookupCachedData(planToCache).nonEmpty) { // Note: If already cache, do nothing but log warning.
       logWarning("Asked to cache already cached data.")
-    } else {
+    } else { // Note: If not cached, cache the query (lazily).
       val sparkSession = query.sparkSession
       val inMemoryRelation = InMemoryRelation(
         sparkSession.sessionState.conf.useCompression,
@@ -209,7 +209,7 @@ class CacheManager extends Logging { // Note: TODO: Will relplace the actually
 
   /** Optionally returns cached data for the given [[LogicalPlan]]. */
   def lookupCachedData(plan: LogicalPlan): Option[CachedData] = readLock {
-    cachedData.asScala.find(cd => plan.sameResult(cd.plan)) // Note: The function of find is to find the true return in iterator.
+    cachedData.asScala.find(cd => plan.sameResult(cd.plan)) // Note: The function of find is to find the true return in iterator. The purpose of sameResult is to find the same result of plan. TODO: Figure out how sameResult works.
   }
 
   /** Replaces segments of the given logical plan with cached versions where possible. */
