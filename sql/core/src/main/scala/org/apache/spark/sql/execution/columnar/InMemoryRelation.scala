@@ -39,14 +39,14 @@ import org.apache.spark.util.{LongAccumulator, Utils}
  * @param buffers The buffers for serialized columns
  * @param stats The stat of columns
  */
-private[columnar]
+private[columnar] // Note: Cached data is represented in batch columnar manner in Cache.
 case class CachedBatch(numRows: Int, buffers: Array[Array[Byte]], stats: InternalRow)
 
 case class CachedRDDBuilder(
     useCompression: Boolean,
     batchSize: Int,
     storageLevel: StorageLevel,
-    @transient cachedPlan: SparkPlan,
+    @transient cachedPlan: SparkPlan, // Note: SparkPlan is Physical plan.
     tableName: Option[String])(
     @transient private var _cachedColumnBuffers: RDD[CachedBatch] = null) {
 
@@ -78,9 +78,9 @@ case class CachedRDDBuilder(
     _cachedColumnBuffers != null
   }
 
-  private def buildBuffers(): RDD[CachedBatch] = {
-    val output = cachedPlan.output
-    val cached = cachedPlan.execute().mapPartitionsInternal { rowIterator =>
+  private def buildBuffers(): RDD[CachedBatch] = { // Note: Critical method, build the actual cache data.
+    val output = cachedPlan.output // Note: rowIterator is of type Iterator[T], T is the type of origin RDD
+    val cached = cachedPlan.execute().mapPartitionsInternal { rowIterator => // Note: execute() returns RDD[InternalRow]
       new Iterator[CachedBatch] {
         def next(): CachedBatch = {
           val columnBuilders = output.map { attribute =>
@@ -155,7 +155,7 @@ object InMemoryRelation {
 
 case class InMemoryRelation(
     output: Seq[Attribute],
-    @transient cacheBuilder: CachedRDDBuilder)(
+    @transient cacheBuilder: CachedRDDBuilder)( // Note: cacheBuilder can produce the actual cached data.
     statsOfPlanToCache: Statistics,
     override val outputOrdering: Seq[SortOrder])
   extends logical.LeafNode with MultiInstanceRelation {

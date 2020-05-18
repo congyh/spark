@@ -32,7 +32,7 @@ import org.apache.spark.sql.types.StructType
  * class name.
  *
  * A new instance of this class will be instantiated each time a DDL call is made.
- *
+ * Note: The main purpose is to provide alias, then we do not need full package name.
  * @since 1.5.0
  */
 @InterfaceStability.Stable
@@ -254,7 +254,7 @@ trait TableScan {
  * @since 1.3.0
  */
 @InterfaceStability.Stable
-trait PrunedScan {
+trait PrunedScan { // Note: Table scan with column pruned.
   def buildScan(requiredColumns: Array[String]): RDD[Row]
 }
 
@@ -272,7 +272,7 @@ trait PrunedScan {
  * @since 1.3.0
  */
 @InterfaceStability.Stable
-trait PrunedFilteredScan {
+trait PrunedFilteredScan { // Note: Table scan with column pruned and row filtered.
   def buildScan(requiredColumns: Array[String], filters: Array[Filter]): RDD[Row]
 }
 
@@ -294,7 +294,7 @@ trait PrunedFilteredScan {
  * @since 1.3.0
  */
 @InterfaceStability.Stable
-trait InsertableRelation {
+trait InsertableRelation { // Note: If is a read-only source, there is no need to implement this.
   def insert(data: DataFrame, overwrite: Boolean): Unit
 }
 
@@ -310,6 +310,6 @@ trait InsertableRelation {
  */
 @Experimental
 @InterfaceStability.Unstable
-trait CatalystScan {
+trait CatalystScan { // Note: Unstable, do not use this trait in user code.
   def buildScan(requiredColumns: Seq[Attribute], filters: Seq[Expression]): RDD[Row]
 }

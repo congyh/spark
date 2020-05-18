@@ -85,7 +85,7 @@ class CacheManager extends Logging {
    * Unlike `RDD.cache()`, the default storage level is set to be `MEMORY_AND_DISK` because
    * recomputing the in-memory columnar representation of the underlying table is expensive.
    */
-  def cacheQuery( // Note: Critical method. TODO: need to refine to use MEMORY_ONLY storage level to meet the need of spark-spark-app project.
+  def cacheQuery( // Note: Cache data.
       query: Dataset[_], // Note: Place holder here means we don't care the actual schema of Dataset.
       tableName: Option[String] = None,
       storageLevel: StorageLevel = MEMORY_AND_DISK): Unit = writeLock {

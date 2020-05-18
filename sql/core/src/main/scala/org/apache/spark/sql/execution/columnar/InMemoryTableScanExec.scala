@@ -30,7 +30,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.vectorized.{ColumnarBatch, ColumnVector}
 
 
-case class InMemoryTableScanExec(
+case class InMemoryTableScanExec( // Note: Physical scan operator for in-memory table.
     attributes: Seq[Attribute],
     predicates: Seq[Expression],
     @transient relation: InMemoryRelation)
@@ -100,7 +100,7 @@ case class InMemoryTableScanExec(
     taskContext.foreach(_.addTaskCompletionListener[Unit](_ => columnarBatch.close()))
     columnarBatch
   }
-
+  // Note: RDD columnar -> RDD[InternalRow]
   private lazy val inputRDD: RDD[InternalRow] = {
     val buffers = filteredCachedBatches()
     val offHeapColumnVectorEnabled = conf.offHeapColumnVectorEnabled
@@ -303,10 +303,10 @@ case class InMemoryTableScanExec(
     }
   }
 
-  protected override def doExecute(): RDD[InternalRow] = {
-    if (supportsBatch) {
+  protected override def doExecute(): RDD[InternalRow] = { // Note: All return RDD[InternalRow] format, either use WSCGE or traditional read.
+    if (supportsBatch) { // Note: Use vectorization to accelerate.
       WholeStageCodegenExec(this)(codegenStageId = 0).execute()
-    } else {
+    } else { // Note: Use common scan.
       inputRDD
     }
   }

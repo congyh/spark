@@ -3040,7 +3040,7 @@ class Dataset[T] private[sql](
    */
   lazy val rdd: RDD[T] = {
     val objectType = exprEnc.deserializer.dataType
-    rddQueryExecution.toRdd.mapPartitions { rows =>
+    rddQueryExecution.toRdd.mapPartitions { rows => // Note: toRdd transforms RDD[InternalRow] to RDD[T]
       rows.map(_.get(0, objectType).asInstanceOf[T])
     }
   }

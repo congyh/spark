@@ -38,7 +38,7 @@ public class InterfaceStability {
    * Evolving interfaces can change from one feature release to another release (i.e. 2.1 to 2.2).
    */
   @Documented
-  public @interface Evolving {};
+  public @interface Evolving {}; // Note: Do not implement Evolving interface, because it may change between small version.
 
   /**
    * Unstable APIs, with no guarantee on stability.

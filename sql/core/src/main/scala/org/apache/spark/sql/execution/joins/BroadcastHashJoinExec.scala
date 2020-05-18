@@ -63,7 +63,7 @@ case class BroadcastHashJoinExec(
   protected override def doExecute(): RDD[InternalRow] = {
     val numOutputRows = longMetric("numOutputRows")
 
-    val broadcastRelation = buildPlan.executeBroadcast[HashedRelation]()
+    val broadcastRelation = buildPlan.executeBroadcast[HashedRelation]() // Note: Calculate RDD and do broadcast.
     streamedPlan.execute().mapPartitions { streamedIter =>
       val hashed = broadcastRelation.value.asReadOnlyCopy()
       TaskContext.get().taskMetrics().incPeakExecutionMemory(hashed.estimatedSize)
