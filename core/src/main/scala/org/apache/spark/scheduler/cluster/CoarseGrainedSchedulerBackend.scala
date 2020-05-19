@@ -66,7 +66,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   // must be protected by `CoarseGrainedSchedulerBackend.this`. Besides, `executorDataMap` should
   // only be modified in `DriverEndpoint.receive/receiveAndReply` with protection by
   // `CoarseGrainedSchedulerBackend.this`.
-  private val executorDataMap = new HashMap[String, ExecutorData]
+  private val executorDataMap = new HashMap[String, ExecutorData] // Note: Critical data structure, contains detail executor data.
 
   // Number of executors requested by the cluster manager, [[ExecutorAllocationManager]]
   @GuardedBy("CoarseGrainedSchedulerBackend.this")
@@ -286,7 +286,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
     }
 
     // Launch tasks returned by a set of resource offers
-    private def launchTasks(tasks: Seq[Seq[TaskDescription]]) {
+    private def launchTasks(tasks: Seq[Seq[TaskDescription]]) { // Note: launch tasks on executors.
       for (task <- tasks.flatten) {
         val serializedTask = TaskDescription.encode(task)
         if (serializedTask.limit() >= maxRpcMessageSize) {
