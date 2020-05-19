@@ -755,7 +755,7 @@ private[deploy] class Worker(
   }
 }
 
-private[deploy] object Worker extends Logging {
+private[deploy] object Worker extends Logging { // Note: Spark worker Entry point.
   val SYSTEM_NAME = "sparkWorker"
   val ENDPOINT_NAME = "Worker"
   private val SSL_NODE_LOCAL_CONFIG_PATTERN = """\-Dspark\.ssl\.useNodeLocalConf\=(.+)""".r

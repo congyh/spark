@@ -111,7 +111,7 @@ private[netty] class NettyRpcEnv(
 
   def startServer(bindAddress: String, port: Int): Unit = {
     val bootstraps: java.util.List[TransportServerBootstrap] =
-      if (securityManager.isAuthenticationEnabled()) {
+      if (securityManager.isAuthenticationEnabled()) { // Note: Default is false.
         java.util.Arrays.asList(new AuthServerBootstrap(transportConf, securityManager))
       } else {
         java.util.Collections.emptyList()
@@ -455,7 +455,7 @@ private[rpc] class NettyRpcEnvFactory extends RpcEnvFactory with Logging {
     val sparkConf = config.conf
     // Use JavaSerializerInstance in multiple threads is safe. However, if we plan to support
     // KryoSerializer in future, we have to use ThreadLocal to store SerializerInstance
-    val javaSerializerInstance =
+    val javaSerializerInstance = // Note: By now only JavaSerializer is supported, because we can see serializer instance in NettyRpcEnv is stored in non ThreadLocal variable.
       new JavaSerializer(sparkConf).newInstance().asInstanceOf[JavaSerializerInstance]
     val nettyEnv =
       new NettyRpcEnv(sparkConf, javaSerializerInstance, config.advertiseAddress,

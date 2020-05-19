@@ -98,7 +98,7 @@ public class TransportServer implements Closeable {
     PooledByteBufAllocator allocator = NettyUtils.createPooledByteBufAllocator(
       conf.preferDirectBufs(), true /* allowCache */, conf.serverThreads());
 
-    bootstrap = new ServerBootstrap()
+    bootstrap = new ServerBootstrap() // Note: bootstrap inited here.
       .group(bossGroup, workerGroup)
       .channel(NettyUtils.getServerChannelClass(ioMode))
       .option(ChannelOption.ALLOCATOR, allocator)
