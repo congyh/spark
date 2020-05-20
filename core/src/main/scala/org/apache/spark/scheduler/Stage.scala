@@ -59,7 +59,7 @@ private[scheduler] abstract class Stage(
     val numTasks: Int,
     val parents: List[Stage],
     val firstJobId: Int,
-    val callSite: CallSite)
+    val callSite: CallSite) // Note: CallSite is where the entry point of this stage in user code.
   extends Logging {
 
   val numPartitions = rdd.partitions.length

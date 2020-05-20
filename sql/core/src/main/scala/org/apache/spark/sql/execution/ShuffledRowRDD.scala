@@ -112,7 +112,7 @@ class CoalescedPartitioner(val parent: Partitioner, val partitionStartIndices: A
  */
 class ShuffledRowRDD(
     var dependency: ShuffleDependency[Int, InternalRow, InternalRow],
-    specifiedPartitionStartIndices: Option[Array[Int]] = None)
+    specifiedPartitionStartIndices: Option[Array[Int]] = None) // Note: determine the partition num of post-shuffle RDD. If not defined, there will be a one-to-one mapping.
   extends RDD[InternalRow](dependency.rdd.context, Nil) {
 
   private[this] val numPreShufflePartitions = dependency.partitioner.numPartitions
@@ -151,18 +151,18 @@ class ShuffledRowRDD(
     val dep = dependencies.head.asInstanceOf[ShuffleDependency[_, _, _]]
     tracker.getPreferredLocationsForShuffle(dep, partition.index)
   }
-
+  // Note: TODO: need to subclass ShuffledRowRDD and overwrite this method.
   override def compute(split: Partition, context: TaskContext): Iterator[InternalRow] = {
     val shuffledRowPartition = split.asInstanceOf[ShuffledRowRDDPartition]
     // The range of pre-shuffle partitions that we are fetching at here is
     // [startPreShufflePartitionIndex, endPreShufflePartitionIndex - 1].
-    val reader =
+    val reader = // Note: The reader will do a many-to-one mapping from preShuffled rdd to postShuffled rdd.
       SparkEnv.get.shuffleManager.getReader(
         dependency.shuffleHandle,
         shuffledRowPartition.startPreShufflePartitionIndex,
         shuffledRowPartition.endPreShufflePartitionIndex,
-        context)
-    reader.read().asInstanceOf[Iterator[Product2[Int, InternalRow]]].map(_._2)
+        context) // Note: TODO: read and transfer to client spark-app.
+    reader.read().asInstanceOf[Iterator[Product2[Int, InternalRow]]].map(_._2) // Note: Only get the InternalRow part.
   }
 
   override def clearDependencies() {

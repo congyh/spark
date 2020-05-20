@@ -41,7 +41,7 @@ import org.apache.spark.util._
  *
  * @param stageId id of the stage this task belongs to
  * @param stageAttemptId attempt id of the stage this task belongs to
- * @param partitionId index of the number in the RDD
+ * @param partitionId index of the number in the RDD Note: TODO: Is partitionId globally unique?
  * @param localProperties copy of thread-local properties set by the user on the driver side.
  * @param serializedTaskMetrics a `TaskMetrics` that is created and serialized on the driver side
  *                              and sent to executor side.

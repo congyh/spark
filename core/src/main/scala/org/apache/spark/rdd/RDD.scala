@@ -75,8 +75,8 @@ import org.apache.spark.util.random.{BernoulliCellSampler, BernoulliSampler, Poi
  * for more details on RDD internals.
  */
 abstract class RDD[T: ClassTag](
-    @transient private var _sc: SparkContext,
-    @transient private var deps: Seq[Dependency[_]]
+    @transient private var _sc: SparkContext, // Note: _sc marked as transient, because it should only be accessed in driver side, which means the transformation or action on RDD should only be planned at driver side.
+    @transient private var deps: Seq[Dependency[_]] // Note: deps on direct parents' rdds, is the default impl for getDependencies method. Subclass should override getDependencies method if they want to compute deps.
   ) extends Serializable with Logging {
 
   if (classOf[RDD[_]].isAssignableFrom(elementClassTag.runtimeClass)) {
@@ -332,7 +332,7 @@ abstract class RDD[T: ClassTag](
     val blockId = RDDBlockId(id, partition.index)
     var readCachedBlock = true
     // This method is called on executors, so we need call SparkEnv.get instead of sc.env.
-    SparkEnv.get.blockManager.getOrElseUpdate(blockId, storageLevel, elementClassTag, () => {
+    SparkEnv.get.blockManager.getOrElseUpdate(blockId, storageLevel, elementClassTag, () => { // Note: On executer, get SparkEnv by calling object SparkEnv.
       readCachedBlock = false
       computeOrReadCheckpoint(partition, context)
     }) match {

@@ -1149,8 +1149,8 @@ private[spark] class DAGScheduler(
       RDDCheckpointData.synchronized {
         taskBinaryBytes = stage match {
           case stage: ShuffleMapStage =>
-            JavaUtils.bufferToArray(
-              closureSerializer.serialize((stage.rdd, stage.shuffleDep): AnyRef))
+            JavaUtils.bufferToArray( // Note: In shuffleMapStage, rdd and deps needs to be transfer over network.
+              closureSerializer.serialize((stage.rdd, stage.shuffleDep): AnyRef)) // Note: TODO: Read Stage source code.
           case stage: ResultStage =>
             JavaUtils.bufferToArray(closureSerializer.serialize((stage.rdd, stage.func): AnyRef))
         }

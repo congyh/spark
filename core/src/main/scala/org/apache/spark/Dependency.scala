@@ -68,7 +68,7 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
  */
 @DeveloperApi
 class ShuffleDependency[K: ClassTag, V: ClassTag, C: ClassTag](
-    @transient private val _rdd: RDD[_ <: Product2[K, V]],
+    @transient private val _rdd: RDD[_ <: Product2[K, V]], // Note: <: means subclass.
     val partitioner: Partitioner,
     val serializer: Serializer = SparkEnv.get.serializer,
     val keyOrdering: Option[Ordering[K]] = None,
@@ -102,7 +102,7 @@ class ShuffleDependency[K: ClassTag, V: ClassTag, C: ClassTag](
  * Represents a one-to-one dependency between partitions of the parent and child RDDs.
  */
 @DeveloperApi
-class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) {
+class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) { // Note: partitionId between parents and child are shared.
   override def getParents(partitionId: Int): List[Int] = List(partitionId)
 }
 
@@ -120,8 +120,8 @@ class RangeDependency[T](rdd: RDD[T], inStart: Int, outStart: Int, length: Int)
   extends NarrowDependency[T](rdd) {
 
   override def getParents(partitionId: Int): List[Int] = {
-    if (partitionId >= outStart && partitionId < outStart + length) {
-      List(partitionId - outStart + inStart)
+    if (partitionId >= outStart && partitionId < outStart + length) { // Note: Make sure that child partitionId is valid.
+      List(partitionId - outStart + inStart) // Note: Parent id + offsert
     } else {
       Nil
     }
