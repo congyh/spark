@@ -670,7 +670,7 @@ private[spark] class ApplicationMaster(args: ApplicationMasterArguments) extends
     if (args.primaryRFile != null && args.primaryRFile.endsWith(".R")) {
       // TODO(davies): add R dependencies here
     }
-
+    // Note: Get Main method from user-provided Class.
     val mainMethod = userClassLoader.loadClass(args.userClass)
       .getMethod("main", classOf[Array[String]])
 
