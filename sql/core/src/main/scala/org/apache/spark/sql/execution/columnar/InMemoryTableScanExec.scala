@@ -56,7 +56,7 @@ case class InMemoryTableScanExec( // Note: Physical scan operator for in-memory 
    * If true, get data from ColumnVector in ColumnarBatch, which are generally faster.
    * If false, get data from UnsafeRow build from CachedBatch
    */
-  override val supportsBatch: Boolean = {
+  override val supportsBatch: Boolean = { // Note: critical method.
     // In the initial implementation, for ease of review
     // support only primitive data types and # of fields is less than wholeStageMaxNumFields
     conf.cacheVectorizedReaderEnabled && relation.schema.fields.forall(f => f.dataType match {
@@ -77,7 +77,7 @@ case class InMemoryTableScanExec( // Note: Physical scan operator for in-memory 
   private val relationSchema = relation.schema.toArray
 
   private lazy val columnarBatchSchema = new StructType(columnIndices.map(i => relationSchema(i)))
-
+  // Note: RDD row-based format to columnar base format.
   private def createAndDecompressColumn(
       cachedColumnarBatch: CachedBatch,
       offHeapColumnVectorEnabled: Boolean): ColumnarBatch = {
@@ -100,9 +100,9 @@ case class InMemoryTableScanExec( // Note: Physical scan operator for in-memory 
     taskContext.foreach(_.addTaskCompletionListener[Unit](_ => columnarBatch.close()))
     columnarBatch
   }
-  // Note: RDD columnar -> RDD[InternalRow]
+  // Note: RDD[CachedBatch] -> RDD[InternalRow], from batched row-based format to row-based format.
   private lazy val inputRDD: RDD[InternalRow] = {
-    val buffers = filteredCachedBatches()
+    val buffers = filteredCachedBatches() // Note: do batch pruning.
     val offHeapColumnVectorEnabled = conf.offHeapColumnVectorEnabled
     if (supportsBatch) {
       // HACK ALERT: This is actually an RDD[ColumnarBatch].

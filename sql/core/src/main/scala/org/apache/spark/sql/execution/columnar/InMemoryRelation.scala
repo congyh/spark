@@ -77,13 +77,13 @@ case class CachedRDDBuilder(
   def isCachedColumnBuffersLoaded: Boolean = {
     _cachedColumnBuffers != null
   }
-
+  // Note: InternalRow[[1, 2, 3], [a, b, c]] -> InternalRow[1, 2, 3, a, b, c], the return of this function is also row-based
   private def buildBuffers(): RDD[CachedBatch] = { // Note: Critical method, build the actual cache data.
     val output = cachedPlan.output // Note: rowIterator is of type Iterator[T], T is the type of origin RDD
     val cached = cachedPlan.execute().mapPartitionsInternal { rowIterator => // Note: execute() returns RDD[InternalRow]
       new Iterator[CachedBatch] {
         def next(): CachedBatch = {
-          val columnBuilders = output.map { attribute =>
+          val columnBuilders = output.map { attribute => // Note: output is a seq of attribute (column info)
             ColumnBuilder(attribute.dataType, batchSize, attribute.name, useCompression)
           }.toArray
 
@@ -91,7 +91,7 @@ case class CachedRDDBuilder(
           var totalSize = 0L
           while (rowIterator.hasNext && rowCount < batchSize
             && totalSize < ColumnBuilder.MAX_BATCH_SIZE_IN_BYTE) {
-            val row = rowIterator.next()
+            val row = rowIterator.next() // Note: Get the next row.
 
             // Added for SPARK-6082. This assertion can be useful for scenarios when something
             // like Hive TRANSFORM is used. The external data generation script used in TRANSFORM
