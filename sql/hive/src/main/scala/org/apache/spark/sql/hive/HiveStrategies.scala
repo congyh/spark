@@ -241,7 +241,7 @@ case class RelationConversions(
   }
 }
 
-private[hive] trait HiveStrategies {
+private[hive] trait HiveStrategies { // Note: Entrance method
   // Possibly being too clever with types here... or not clever enough.
   self: SparkPlanner =>
 

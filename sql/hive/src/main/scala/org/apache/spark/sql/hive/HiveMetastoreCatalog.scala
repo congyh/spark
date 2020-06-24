@@ -175,7 +175,7 @@ private[hive] class HiveMetastoreCatalog(sparkSession: SparkSession) extends Log
             options = options)(sparkSession = sparkSession)
           val created = LogicalRelation(fsRelation, updatedTable)
           catalogProxy.cacheTable(tableIdentifier, created)
-          created
+          created // Note: Return created logical relation use table info from metastore.
         }
 
         logicalRelation

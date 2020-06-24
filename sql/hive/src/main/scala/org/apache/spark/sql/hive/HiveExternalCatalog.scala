@@ -396,7 +396,7 @@ private[spark] class HiveExternalCatalog(conf: SparkConf, hadoopConf: Configurat
 
       case (None, message) =>
         logWarning(message)
-        saveTableIntoHive(newSparkSQLSpecificMetastoreTable(), ignoreIfExists)
+        saveTableIntoHive(newSparkSQLSpecificMetastoreTable(), ignoreIfExists) // Note: Critical method.
     }
   }
 
