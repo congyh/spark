@@ -1809,7 +1809,7 @@ class SparkContext(config: SparkConf) extends Logging {
    * Register an RDD to be persisted in memory and/or disk storage
    */
   private[spark] def persistRDD(rdd: RDD[_]) {
-    persistentRdds(rdd.id) = rdd
+    persistentRdds(rdd.id) = rdd // Note: return a map
   }
 
   /**
