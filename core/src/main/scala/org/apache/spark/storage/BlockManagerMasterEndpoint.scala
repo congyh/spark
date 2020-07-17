@@ -234,7 +234,7 @@ class BlockManagerMasterEndpoint(
         val maxReplicas = locations.size + 1
         val i = (new Random(blockId.hashCode)).nextInt(locations.size)
         val blockLocations = locations.toSeq
-        val candidateBMId = blockLocations(i)
+        val candidateBMId = blockLocations(i) // Note: Select one as replication starter.
         blockManagerInfo.get(candidateBMId).foreach { bm =>
           val remainingLocations = locations.toSeq.filter(bm => bm != candidateBMId)
           val replicateMsg = ReplicateBlock(blockId, remainingLocations, maxReplicas)

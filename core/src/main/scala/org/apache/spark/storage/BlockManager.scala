@@ -746,7 +746,7 @@ private[spark] class BlockManager(
     } else {
       null
     }
-
+    // Note: First shuffle, then prefer local, then prefer same rack. This operation also avoid all executors get blocks from driver.
     val locations = sortLocations(blockLocations)
     val maxFetchFailures = locations.size
     var locationIterator = locations.iterator
@@ -1398,7 +1398,7 @@ private[spark] class BlockManager(
     val peersFailedToReplicateTo = mutable.HashSet.empty[BlockManagerId]
     var numFailures = 0
 
-    val initialPeers = getPeers(false).filterNot(existingReplicas.contains)
+    val initialPeers = getPeers(false).filterNot(existingReplicas.contains) // Note: Get all peers except existing replicas (the caller BlockManager is sure to have an existing replica and not count in because we use getPeers).
 
     var peersForReplication = blockReplicationPolicy.prioritize(
       blockManagerId,
