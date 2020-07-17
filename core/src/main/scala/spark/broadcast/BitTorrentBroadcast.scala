@@ -88,7 +88,7 @@ extends Broadcast[T] with Logging with Serializable {
     // Guide still hasn't sent any block
     numCopiesSent = new Array[Int](totalBlocks)
 
-    guideMR = new GuideMultipleRequests
+    guideMR = new GuideMultipleRequests // Note: guideMR is a kind of Thread
     guideMR.setDaemon(true)
     guideMR.start()
     logInfo("GuideMultipleRequests started...")

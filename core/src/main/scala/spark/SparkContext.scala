@@ -54,9 +54,9 @@ class SparkContext(
   if (RemoteActor.classLoader == null) {
     RemoteActor.classLoader = getClass.getClassLoader
   }
-  
+  // Note: Init all modules
   // Create the Spark execution environment (cache, map output tracker, etc)
-  val env = SparkEnv.createFromSystemProperties(true)
+  val env = SparkEnv.createFromSystemProperties(true) // Note: You can see main module within this call.
   SparkEnv.set(env)
   Broadcast.initialize(true)
 
@@ -66,7 +66,7 @@ class SparkContext(
     val LOCAL_N_REGEX = """local\[([0-9]+)\]""".r
     // Regular expression for local[N, maxRetries], used in tests with failing tasks
     val LOCAL_N_FAILURES_REGEX = """local\[([0-9]+),([0-9]+)\]""".r
-    master match {
+    master match { // Note: Not support yarn yet.
       case "local" => 
         new LocalScheduler(1, 0)
       case LOCAL_N_REGEX(threads) => 
