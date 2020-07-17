@@ -980,7 +980,7 @@ private[spark] class BlockManager(
       val startTimeMs = System.currentTimeMillis
       // Since we're storing bytes, initiate the replication before storing them locally.
       // This is faster as data is already serialized and ready to send.
-      val replicationFuture = if (level.replication > 1) {
+      val replicationFuture = if (level.replication > 1) { // Note: Critical method, do replication.
         Future {
           // This is a blocking action and should run in futureExecutionContext which is a cached
           // thread pool. The ByteBufferBlockData wrapper is not disposed of to avoid releasing
