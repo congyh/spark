@@ -157,7 +157,7 @@ abstract class RDD[T: ClassManifest](@transient sc: SparkContext) extends Serial
   }
 
   def collect(): Array[T] = {
-    val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
+    val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray) // Note: Trigger true running.
     Array.concat(results: _*)
   }
 

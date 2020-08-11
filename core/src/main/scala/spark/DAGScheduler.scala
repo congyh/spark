@@ -94,8 +94,8 @@ private trait DAGScheduler extends Scheduler with Logging {
 
   def getShuffleMapStage(shuf: ShuffleDependency[_,_,_]): Stage = {
     shuffleToMapStage.get(shuf.shuffleId) match {
-      case Some(stage) => stage
-      case None =>
+      case Some(stage) => stage // Note: If already generate a stage, return the stage directly.
+      case None => // Note: Or create a new stage.
         val stage = newStage(shuf.rdd, Some(shuf))
         shuffleToMapStage(shuf.shuffleId) = stage
         stage
@@ -142,20 +142,20 @@ private trait DAGScheduler extends Scheduler with Logging {
     val missing = new HashSet[Stage]
     val visited = new HashSet[RDD[_]]
     def visit(rdd: RDD[_]) {
-      if (!visited(rdd)) {
+      if (!visited(rdd)) { // Note: Recursively visit rdd tree.
         visited += rdd
         val locs = getCacheLocs(rdd)
         for (p <- 0 until rdd.splits.size) {
-          if (locs(p) == Nil) {
-            for (dep <- rdd.dependencies) {
+          if (locs(p) == Nil) { // Note: If split not in cache, compute it.
+            for (dep <- rdd.dependencies) { // Note: Traverse rdd's deps.
               dep match {
-                case shufDep: ShuffleDependency[_,_,_] =>
+                case shufDep: ShuffleDependency[_,_,_] => // Note: TODO: 看到这里了.
                   val stage = getShuffleMapStage(shufDep)
                   if (!stage.isAvailable) {
-                    missing += stage
+                    missing += stage // Note: Only when we encountered a shuffle dep, should we create a new stage.
                   }
                 case narrowDep: NarrowDependency[_] =>
-                  visit(narrowDep.rdd)
+                  visit(narrowDep.rdd) // Note: NarrowDependency not triggered a new stage.
               }
             }
           }
@@ -163,7 +163,7 @@ private trait DAGScheduler extends Scheduler with Logging {
       }
     }
     visit(stage.rdd)
-    missing.toList
+    missing.toList // Note: All stages that we need to calculate.
   }
 
   override def runJob[T, U](

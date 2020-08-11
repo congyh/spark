@@ -313,7 +313,7 @@ class SparkContext(
       ): Array[U] = {
     logInfo("Starting job...")
     val start = System.nanoTime
-    val result = scheduler.runJob(rdd, func, partitions, allowLocal)
+    val result = scheduler.runJob(rdd, func, partitions, allowLocal) // Note: Trigger DAGScheduler runJob.
     logInfo("Job finished in " + (System.nanoTime - start) / 1e9 + " s")
     result
   }
@@ -335,7 +335,7 @@ class SparkContext(
   }
 
   def runJob[T, U: ClassManifest](rdd: RDD[T], func: Iterator[T] => U): Array[U] = {
-    runJob(rdd, func, 0 until rdd.splits.size, false)
+    runJob(rdd, func, 0 until rdd.splits.size, false) // Note: Trigger scheduler.runJob inside
   }
 
   // Clean a closure to make it ready to serialized and send to tasks
@@ -379,7 +379,7 @@ object SparkContext {
     def addInPlace(t1: Int, t2: Int): Int = t1 + t2
     def zero(initialValue: Int) = 0
   }
-
+  // Note: Add some extra functions support for key-value rdd.
   // TODO: Add AccumulatorParams for other types, e.g. lists and strings
   implicit def rddToPairRDDFunctions[K: ClassManifest, V: ClassManifest](rdd: RDD[(K, V)]) =
     new PairRDDFunctions(rdd)

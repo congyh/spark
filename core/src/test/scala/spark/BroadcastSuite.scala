@@ -21,7 +21,7 @@ class BroadcastSuite extends FunSuite with BeforeAndAfter {
     assert(results.collect.toSet === Set((1, 10), (2, 10)))
   }
 
-  test("broadcast variables accessed in multiple threads") {
+  test("broadcast variables accessed in multiple threads") { // Note: TODO: Where is broadcast varibles accessed in multiple threads???
     sc = new SparkContext("local[10]", "test")
     val list = List(1, 2, 3, 4)
     val listBroadcast = sc.broadcast(list)

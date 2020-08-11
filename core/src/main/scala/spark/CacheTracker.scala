@@ -117,7 +117,7 @@ class CacheTracker(isMaster: Boolean, theCache: Cache) extends Logging {
   val cache = theCache.newKeySpace()
 
   if (isMaster) {
-    val tracker = new CacheTrackerActor
+    val tracker = new CacheTrackerActor // Note: Only master create an CacheTrackerActor
     tracker.start()
     trackerActor = tracker
   } else {
