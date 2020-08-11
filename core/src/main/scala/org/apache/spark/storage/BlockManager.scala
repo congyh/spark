@@ -705,15 +705,15 @@ private[spark] class BlockManager(
    * multiple block managers can share the same host, followed by hosts on the same rack.
    */
   private def sortLocations(locations: Seq[BlockManagerId]): Seq[BlockManagerId] = {
-    val locs = Random.shuffle(locations)
-    val (preferredLocs, otherLocs) = locs.partition { loc => blockManagerId.host == loc.host }
-    blockManagerId.topologyInfo match {
-      case None => preferredLocs ++ otherLocs
+    val locs = Random.shuffle(locations) // Note: First shuffle locations, to avoid every time get from the same replica. (e.g. for broadcast, it can prevent the driver from becoming the bottleneck.)
+    val (preferredLocs, otherLocs) = locs.partition { loc => blockManagerId.host == loc.host } // Note: Then prefer same host.
+    blockManagerId.topologyInfo match { // Note: topologyInfo here refers to rack info.
+      case None => preferredLocs ++ otherLocs // Note: If none rack info, then prefer same host than others.
       case Some(_) =>
         val (sameRackLocs, differentRackLocs) = otherLocs.partition {
           loc => blockManagerId.topologyInfo == loc.topologyInfo
         }
-        preferredLocs ++ sameRackLocs ++ differentRackLocs
+        preferredLocs ++ sameRackLocs ++ differentRackLocs // Note: If have rack info, then prefer same host over same rack over others.
     }
   }
 

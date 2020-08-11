@@ -147,18 +147,18 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
     // to the driver, so other executors can pull these chunks from this executor as well.
     val blocks = new Array[BlockData](numBlocks)
     val bm = SparkEnv.get.blockManager
-
+    // Note: Delicate designation, shuffle the getting sequence so that multiple executor can get the blocks in a different order to prevent the driver becomes bottleneck.
     for (pid <- Random.shuffle(Seq.range(0, numBlocks))) {
       val pieceId = BroadcastBlockId(id, "piece" + pid)
       logDebug(s"Reading piece $pieceId of $broadcastId")
       // First try getLocalBytes because there is a chance that previous attempts to fetch the
       // broadcast blocks have already fetched some of the blocks. In that case, some blocks
       // would be available locally (on this executor).
-      bm.getLocalBytes(pieceId) match {
-        case Some(block) =>
+      bm.getLocalBytes(pieceId) match { // Note: First try to get local bytes.
+        case Some(block) => // Note: If get from local, finished.
           blocks(pid) = block
           releaseLock(pieceId)
-        case None =>
+        case None => // Note: If cannot get from local, try to get from remote.
           bm.getRemoteBytes(pieceId) match {
             case Some(b) =>
               if (checksumEnabled) {
@@ -170,11 +170,11 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
               }
               // We found the block from remote executors/driver's BlockManager, so put the block
               // in this executor's BlockManager.
-              if (!bm.putBytes(pieceId, b, StorageLevel.MEMORY_AND_DISK_SER, tellMaster = true)) {
+              if (!bm.putBytes(pieceId, b, StorageLevel.MEMORY_AND_DISK_SER, tellMaster = true)) { // Note: When we get block from remote, first put it into local BlockManager.
                 throw new SparkException(
                   s"Failed to store $pieceId of $broadcastId in local BlockManager")
               }
-              blocks(pid) = new ByteBufferBlockData(b, true)
+              blocks(pid) = new ByteBufferBlockData(b, true) // Note: Then return result.
             case None =>
               throw new SparkException(s"Failed to get $pieceId of $broadcastId")
           }
