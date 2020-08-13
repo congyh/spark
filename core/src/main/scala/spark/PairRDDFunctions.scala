@@ -71,7 +71,7 @@ class PairRDDFunctions[K: ClassManifest, V: ClassManifest](
   }
 
   def reduceByKey(partitioner: Partitioner, func: (V, V) => V): RDD[(K, V)] = {
-    combineByKey[V]((v: V) => v, func, func, partitioner)
+    combineByKey[V]((v: V) => v, func, func, partitioner) // Note: For reduceByKey, createCombiner is V => V, it means that combiner type is the same as value. Secondly, mregeValues and mergeCombiners is the same: (V, V) => V, and they share the same func definition.
   }
 
   def reduceByKey(func: (V, V) => V, numSplits: Int): RDD[(K, V)] = {

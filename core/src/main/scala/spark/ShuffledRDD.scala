@@ -22,7 +22,7 @@ class ShuffledRDD[K, V, C](
   
   override def preferredLocations(split: Split) = Nil
   
-  val dep = new ShuffleDependency(context.newShuffleId, parent, aggregator, part)
+  val dep = new ShuffleDependency(context.newShuffleId, parent, aggregator, part) // Note: TODO: 看到这里了.
   override val dependencies = List(dep)
 
   override def compute(split: Split): Iterator[(K, C)] = {

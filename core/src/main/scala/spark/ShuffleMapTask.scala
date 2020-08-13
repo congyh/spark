@@ -30,11 +30,11 @@ class ShuffleMapTask(
       val bucket = buckets(bucketId)
       var existing = bucket.get(k)
       if (existing == null) {
-        bucket.put(k, aggregator.createCombiner(v))
+        bucket.put(k, aggregator.createCombiner(v)) // Note: Bucket is of type (K, C), C is type of Combiner.
       } else {
-        bucket.put(k, aggregator.mergeValue(existing, v))
+        bucket.put(k, aggregator.mergeValue(existing, v)) // Note: If combiner is already inited, then combine value to existing combiner.
       }
-    }
+    } // Note: Ser output to files using specific serializer.
     val ser = SparkEnv.get.serializer.newInstance()
     for (i <- 0 until numOutputSplits) {
       val file = SparkEnv.get.shuffleManager.getOutputFile(dep.shuffleId, partition, i)
