@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.io.FastBufferedOutputStream
 class ShuffleMapTask(
     runId: Int,
     stageId: Int,
-    rdd: RDD[_], 
+    rdd: RDD[_], // Note: The rdd is always parent RDD. parent rdd: dep is always 1:1:, but an rdd can has a dependency list.
     dep: ShuffleDependency[_,_,_],
     val partition: Int, 
     locs: Seq[String])

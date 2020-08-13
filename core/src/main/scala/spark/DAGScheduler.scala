@@ -111,7 +111,7 @@ private trait DAGScheduler extends Scheduler with Logging {
     }
     val id = nextStageId.getAndIncrement()
     val stage = new Stage(id, rdd, shuffleDep, getParentStages(rdd))
-    idToStage(id) = stage
+    idToStage(id) = stage // Note: Put it in map.
     stage
   }
 
@@ -125,7 +125,7 @@ private trait DAGScheduler extends Scheduler with Logging {
         // we can't do it in its constructor because # of splits is unknown
         cacheTracker.registerRDD(r.id, r.splits.size)
         for (dep <- r.dependencies) {
-          dep match {
+          dep match { // Note: Only when dep is ShuffleDependency, will we create a new Stage, or use the same stage.
             case shufDep: ShuffleDependency[_,_,_] =>
               parents += getShuffleMapStage(shufDep)
             case _ =>
@@ -149,13 +149,13 @@ private trait DAGScheduler extends Scheduler with Logging {
           if (locs(p) == Nil) { // Note: If split not in cache, compute it.
             for (dep <- rdd.dependencies) { // Note: Traverse rdd's deps.
               dep match {
-                case shufDep: ShuffleDependency[_,_,_] => // Note: TODO: 看到这里了.
+                case shufDep: ShuffleDependency[_,_,_] =>
                   val stage = getShuffleMapStage(shufDep)
-                  if (!stage.isAvailable) {
-                    missing += stage // Note: Only when we encountered a shuffle dep, should we create a new stage.
+                  if (!stage.isAvailable) { // Note: Only when all shuffle map side partitions is ready, will the stage be available.
+                    missing += stage
                   }
                 case narrowDep: NarrowDependency[_] =>
-                  visit(narrowDep.rdd) // Note: NarrowDependency not triggered a new stage.
+                  visit(narrowDep.rdd) // Note: A NarrowDependency is in the same stage, continue drill down.
               }
             }
           }
@@ -193,7 +193,7 @@ private trait DAGScheduler extends Scheduler with Logging {
       updateCacheLocs()
       
       logInfo("Final stage: " + finalStage)
-      logInfo("Parents of final stage: " + finalStage.parents)
+      logInfo("Parents of final stage: " + finalStage.parents) // Note: All stages, if no shuffle deps, then only one stage will be create.
       logInfo("Missing parents: " + getMissingParentStages(finalStage))
   
       // Optimization for short actions like first() and take() that can be computed locally
@@ -209,17 +209,17 @@ private trait DAGScheduler extends Scheduler with Logging {
       eventQueues(runId) = new Queue[CompletionEvent]
   
       def submitStage(stage: Stage) {
-        if (!waiting(stage) && !running(stage)) {
+        if (!waiting(stage) && !running(stage)) { // Note: If is the stage that we haven't seen before.
           val missing = getMissingParentStages(stage)
-          if (missing == Nil) {
+          if (missing == Nil) { // Note: If all parents has done, or there is no parent stages (for final stage or first stage)
             logInfo("Submitting " + stage + ", which has no missing parents")
             submitMissingTasks(stage)
             running += stage
-          } else {
+          } else { // Note: If there is some un-done parents.
             for (parent <- missing) {
-              submitStage(parent)
+              submitStage(parent) // Note: Submit parent stage first.
             }
-            waiting += stage
+            waiting += stage // Note: Wait until all parent stage has done.
           }
         }
       }
@@ -228,16 +228,16 @@ private trait DAGScheduler extends Scheduler with Logging {
         // Get our pending tasks and remember them in our pendingTasks entry
         val myPending = pendingTasks.getOrElseUpdate(stage, new HashSet)
         var tasks = ArrayBuffer[Task[_]]()
-        if (stage == finalStage) {
+        if (stage == finalStage) { // Note: Final stage use ResultTask, all previous stage is shuffleMapStage, so will use ShuffleMapTask.
           for (id <- 0 until numOutputParts if (!finished(id))) {
             val part = outputParts(id)
-            val locs = getPreferredLocs(finalRdd, part)
+            val locs = getPreferredLocs(finalRdd, part) // Note: This can be Nil
             tasks += new ResultTask(runId, finalStage.id, finalRdd, func, part, locs, id)
           }
         } else {
           for (p <- 0 until stage.numPartitions if stage.outputLocs(p) == Nil) {
-            val locs = getPreferredLocs(stage.rdd, p)
-            tasks += new ShuffleMapTask(runId, stage.id, stage.rdd, stage.shuffleDep.get, p, locs)
+            val locs = getPreferredLocs(stage.rdd, p) // Note: stage.rdd is always parent rdd(s).
+            tasks += new ShuffleMapTask(runId, stage.id, stage.rdd, stage.shuffleDep.get, p, locs) // Note: TODO: 看到这里了
           }
         }
         myPending ++= tasks

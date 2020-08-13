@@ -1,5 +1,5 @@
 package spark
-
+// Note: The rdd means parent rdd.
 abstract class Dependency[T](val rdd: RDD[T], val isShuffle: Boolean) extends Serializable
 
 abstract class NarrowDependency[T](rdd: RDD[T]) extends Dependency(rdd, false) {
@@ -8,7 +8,7 @@ abstract class NarrowDependency[T](rdd: RDD[T]) extends Dependency(rdd, false) {
 
 class ShuffleDependency[K, V, C](
     val shuffleId: Int,
-    rdd: RDD[(K, V)],
+    rdd: RDD[(K, V)], // Note: The rdd means parent rdd.
     val aggregator: Aggregator[K, V, C],
     val partitioner: Partitioner)
   extends Dependency(rdd, true)
