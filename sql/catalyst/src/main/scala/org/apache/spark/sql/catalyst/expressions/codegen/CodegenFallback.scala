@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.Block._
 /**
  * A trait that can be used to provide a fallback mode for expression code generation.
  */
-trait CodegenFallback extends Expression {
+trait CodegenFallback extends Expression { // Note: The codegen result for CodegenFallback instance is eval() calling, which means no codegen support.
 
   protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
     // LeafNode does not need `input`
@@ -46,7 +46,7 @@ trait CodegenFallback extends Expression {
     val objectTerm = ctx.freshName("obj")
     val placeHolder = ctx.registerComment(this.toString)
     val javaType = CodeGenerator.javaType(this.dataType)
-    if (nullable) {
+    if (nullable) { // Note: We can see that there use eval() call to indicate no codegen support.
       ev.copy(code = code"""
         $placeHolder
         Object $objectTerm = ((Expression) references[$idx]).eval($input);

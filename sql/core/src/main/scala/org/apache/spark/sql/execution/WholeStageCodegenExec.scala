@@ -712,12 +712,12 @@ case class CollapseCodegenStages(conf: SQLConf) extends Rule[SparkPlan] {
 
   private def supportCodegen(plan: SparkPlan): Boolean = plan match {
     case plan: CodegenSupport if plan.supportCodegen =>
-      val willFallback = plan.expressions.exists(_.find(e => !supportCodegen(e)).isDefined)
+      val willFallback = plan.expressions.exists(_.find(e => !supportCodegen(e)).isDefined) // Note: If exist expressions that not support codegen (e.g. ArrayAggregate), then the plan will be treated as not support codegen.
       // the generated code will be huge if there are too many columns
       val hasTooManyOutputFields =
-        WholeStageCodegenExec.isTooManyFields(conf, plan.schema)
+        WholeStageCodegenExec.isTooManyFields(conf, plan.schema) // Note: If count of output fields is bigger than default 100.
       val hasTooManyInputFields =
-        plan.children.exists(p => WholeStageCodegenExec.isTooManyFields(conf, p.schema))
+        plan.children.exists(p => WholeStageCodegenExec.isTooManyFields(conf, p.schema)) // Note: If count of input fields is bigger than default 100.
       !willFallback && !hasTooManyOutputFields && !hasTooManyInputFields
     case _ => false
   }
