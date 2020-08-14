@@ -31,7 +31,7 @@ object ClosureCleaner extends Logging {
     for (f <- obj.getClass.getDeclaredFields if f.getName == "$outer") {
       f.setAccessible(true)
       if (isClosure(f.getType)) {
-        return f.getType :: getOuterClasses(f.get(obj))
+        return f.getType :: getOuterClasses(f.get(obj)) // Note: Recursive get outer Class
       } else {
         return f.getType :: Nil // Stop at the first $outer that is not a closure
       }

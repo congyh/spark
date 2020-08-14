@@ -61,7 +61,7 @@ class Executor extends org.apache.mesos.Executor with Logging {
     threadPool.execute(new TaskRunner(task, d))
   }
 
-  class TaskRunner(info: TaskInfo, d: ExecutorDriver)
+  class TaskRunner(info: TaskInfo, d: ExecutorDriver) // Note: The physical task runner.
   extends Runnable {
     override def run() = {
       val tid = info.getTaskId.getValue
@@ -79,8 +79,8 @@ class Executor extends org.apache.mesos.Executor with Logging {
         for (gen <- task.generation) {// Update generation if any is set
           env.mapOutputTracker.updateGeneration(gen)
         }
-        val value = task.run(tid.toInt)
-        val accumUpdates = Accumulators.values
+        val value = task.run(tid.toInt) // Note: For ResultTask, this is partial result; for ShuffleMapTask, this is serverURL; TODO: how do we use serverURL
+        val accumUpdates = Accumulators.values // Note: TODO: 看到这里了
         val result = new TaskResult(value, accumUpdates)
         d.sendStatusUpdate(TaskStatus.newBuilder()
             .setTaskId(info.getTaskId)
