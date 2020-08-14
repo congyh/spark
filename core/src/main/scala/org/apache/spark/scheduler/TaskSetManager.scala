@@ -483,7 +483,7 @@ private[spark] class TaskSetManager(
         }
         // Serialize and return the task
         val serializedTask: ByteBuffer = try {
-          ser.serialize(task)
+          ser.serialize(task) // Note: Critical calling.
         } catch {
           // If the task cannot be serialized, then there's no point to re-attempt the task,
           // as it will always fail. So just abort the whole task-set.
