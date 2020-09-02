@@ -67,7 +67,7 @@ abstract class AbstractSqlParser extends ParserInterface with Logging {
 
   /** Creates LogicalPlan for a given SQL string. */
   override def parsePlan(sqlText: String): LogicalPlan = parse(sqlText) { parser =>
-    astBuilder.visitSingleStatement(parser.singleStatement()) match {
+    astBuilder.visitSingleStatement(parser.singleStatement()) match { // Note: A callback for recursive converting ANTLR4 ParseTree to Catalyst Expression, LogicalPlan, TableIdentifier.
       case plan: LogicalPlan => plan
       case _ =>
         val position = Origin(None, None)
