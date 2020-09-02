@@ -350,7 +350,7 @@ object LikeSimplification extends Rule[LogicalPlan] {
  */
 object NullPropagation extends Rule[LogicalPlan] {
   def apply(plan: LogicalPlan): LogicalPlan = plan transform {
-    case q: LogicalPlan => q transformExpressionsUp {
+    case q: LogicalPlan => q transformExpressionsUp { // Note: The direction of transform is bottom-up, which is propagation.
       case e @ Count(Literal(null, _)) => Cast(Literal(0L), e.dataType)
       case e @ IsNull(c) if !c.nullable => Literal.create(false, BooleanType)
       case e @ IsNotNull(c) if !c.nullable => Literal.create(true, BooleanType)
