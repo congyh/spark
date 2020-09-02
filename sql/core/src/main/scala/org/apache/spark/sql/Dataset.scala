@@ -2617,7 +2617,7 @@ class Dataset[T] private[sql](
   @Experimental
   @InterfaceStability.Evolving
   def map[U : Encoder](func: T => U): Dataset[U] = withTypedPlan {
-    MapElements[T, U](func, logicalPlan)
+    MapElements[T, U](func, logicalPlan) // Note: MapElements LogicalPlan will treat this logicalPlan as child, which constructs a logicalPlan tree.
   }
 
   /**

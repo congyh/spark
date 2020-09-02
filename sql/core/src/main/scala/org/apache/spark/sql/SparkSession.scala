@@ -377,7 +377,7 @@ class SparkSession private(
   @DeveloperApi
   @InterfaceStability.Evolving
   def createDataFrame(rows: java.util.List[Row], schema: StructType): DataFrame = {
-    Dataset.ofRows(self, LocalRelation.fromExternalRows(schema.toAttributes, rows.asScala))
+    Dataset.ofRows(self, LocalRelation.fromExternalRows(schema.toAttributes, rows.asScala)) // Note: LocalRelation is a leafNode type of LogicalPlan.
   }
 
   /**
