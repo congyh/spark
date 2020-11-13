@@ -140,7 +140,7 @@ class CacheManager extends Logging {
     val it = cachedData.iterator()
     while (it.hasNext) {
       val cd = it.next()
-      if (shouldRemove(cd.plan)) {
+      if (shouldRemove(cd.plan)) { // Note: If the plan is not in cache, nothing happens.
         cd.cachedRepresentation.cacheBuilder.clearCache(blocking)
         it.remove()
       }
